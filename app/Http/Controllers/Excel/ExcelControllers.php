@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Excel;
 use App\Exports\ExcelExport;
 use App\Http\Controllers\Controller;
 use App\Imports\ExcelImports;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Overtrue\Pinyin\Pinyin;
 
@@ -63,12 +64,29 @@ class ExcelControllers extends Controller
         }
     }
 
+    /**
+     * ImageName（照片名称命名）
+     * @return array|\Illuminate\Http\JsonResponse
+     */
     public function imgChangeName()
     {
-        return [123];
-        // upload
-//        if ($_FILES["excel"]["error"] > 0) {
-//            return response()->json(['Error' => $_FILES["excel"]["error"]]);
-//        }
+        // Excel Get Name
+        if ($_FILES["excel"]["error"] > 0) {
+            return response()->json(['Error' => $_FILES["excel"]["error"]]);
+        }
+        $result = move_uploaded_file($_FILES["excel"]["tmp_name"], public_path('Img-Name/name/excel.xlsx'));
+
+        if ($result) {
+            // get excel connect
+            $name = Excel::toArray($this->import, public_path('Img-Name/name/excel.xlsx'));
+            $nameFix = 'CL1-BNDS_';
+            // upload image
+            if (count($_FILES['img']['name']) > 0) {
+                foreach ($_FILES['img']['tmp_name'] as $key => $valus) {
+                    $result = move_uploaded_file($_FILES["img"]["tmp_name"][$key], public_path('Img-Name/img/' . $nameFix . $name[0][$key][2] . '.jpg'));
+                }
+            }
+        }
+        return $result ? ['message' => 'Success！'] : ['message' => 'Error！'];
     }
 }
