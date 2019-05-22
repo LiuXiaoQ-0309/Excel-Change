@@ -16,3 +16,9 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Excel-change
+// Pinyin (中文名字获取拼音)
+Route::get('import-excel-get-py', 'Excel\ExcelControllers@getPy');
+//
+Route::post('img-change-name', 'Excel\ExcelControllers@imgChangeName');
