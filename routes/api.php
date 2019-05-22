@@ -19,6 +19,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // Excel-change
 // Pinyin (中文名字获取拼音)
-Route::get('import-excel-get-py', 'Excel\ExcelControllers@getPy');
+Route::post('import-excel-get-py', 'Excel\ExcelControllers@getPy');
 // ImageName（照片名称命名）
 Route::post('img-change-name', 'Excel\ExcelControllers@imgChangeName');
