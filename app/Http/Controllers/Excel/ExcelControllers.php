@@ -28,15 +28,13 @@ class ExcelControllers extends Controller
     public function getPy()
     {
         // upload
-//        if ($_FILES["excel"]["error"] > 0) {
-//            return response()->json(['Error' => $_FILES["excel"]["error"]]);
-//        }
-//        $result = move_uploaded_file($_FILES["excel"]["tmp_name"], public_path('Excel/' . $_FILES["excel"]["name"]));
-        $result = true;
+        if ($_FILES["excel"]["error"] > 0) {
+            return response()->json(['Error' => $_FILES["excel"]["error"]]);
+        }
+        $result = move_uploaded_file($_FILES["excel"]["tmp_name"], public_path('Excel/' . $_FILES["excel"]["name"]));
         if ($result) {
             // Import
-//            $array = Excel::toArray($this->import, public_path('Excel/' . $_FILES["excel"]["name"]));
-            $array = Excel::toArray($this->import, public_path('Excel/excel.xlsx'));
+            $array = Excel::toArray($this->import, public_path('Excel/' . $_FILES["excel"]["name"]));
             // Pinyin
             foreach ($array[0] as $key => &$value) {
                 if ($value[0]) {
@@ -59,9 +57,13 @@ class ExcelControllers extends Controller
 
             // Export
             $export = new ExcelExport($array[0]);
-            return Excel::download($export, 'export.xlsx');
-
+//            return Excel::download($export, 'export.xlsx');
+            if (Excel::store($export, $_FILES["excel"]["name"])) {
+                return ['code' => 1, 'message' => 'http://localhost:8090/Excel-Change/storage/app/' . $_FILES["excel"]["name"]];
+            }
+            return ['code' => 0, 'message' => 'Export false!'];
         }
+        return ['code' => 0, 'message' => 'No Upload File！'];
     }
 
     /**
