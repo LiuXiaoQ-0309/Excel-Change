@@ -19,11 +19,24 @@
 
     <div>
         <form class="form-inline">
+            <p class="help-block">1.Chinese name get Pinyin</p>
             <div class="form-group">
-                <p class="help-block">Chinese name get Pinyin</p>
                 <input type="file" id="exampleInputFile">
             </div>
             <button type="button" class="btn  btn-success" onclick="getPinyin()">Submit</button>
+        </form>
+    </div>
+
+    <div style="padding-top: 50px">
+        <form class="form-inline">
+            <p class="help-block">2.Name the picture</p>
+            <div class="form-group">
+                <p>Name Excel</p>
+                <input type="file">
+                <p style="padding-top: 10px">Image</p>
+                <input type="file">
+            </div>
+            <button type="button" class="btn  btn-info" onclick="nameImage()">Submit</button>
         </form>
     </div>
 </div>
@@ -51,6 +64,10 @@
                 }
             },
         });
+    }
+
+    function nameImage() {
+        alert(123);
     }
 
 </script>
