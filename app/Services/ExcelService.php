@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Exports\ExcelExport;
 use App\Imports\ExcelImports;
+use Chumper\Zipper\Zipper;
 use Maatwebsite\Excel\Facades\Excel;
 use Overtrue\Pinyin\Pinyin;
 
@@ -55,6 +56,7 @@ class ExcelService
         return $array;
     }
 
+
     /**
      * Excel Import To Array
      * @param $path
@@ -64,6 +66,7 @@ class ExcelService
     {
         return Excel::toArray($this->excelImports, $path);
     }
+
 
     /**
      * Save Excel Export Files
@@ -90,4 +93,17 @@ class ExcelService
         return Excel::download($export, $name);
     }
 
+
+    /**
+     * Set Zipper
+     * @param $filesPath
+     * @param $zipPath
+     * @throws \Exception
+     */
+    public function setZipper($filesPath, $zipPath)
+    {
+        $zipper = new Zipper();
+        $zipData = glob($filesPath);
+        return $zipper->make($zipPath)->add($zipData)->close();
+    }
 }

@@ -27,7 +27,7 @@ class ExcelControllers extends Controller
     public function getPy()
     {
         if (count($_FILES) > 0) {
-            // This Name Include Suffix
+            // This Name Include Extension
             $fileName = $_FILES["excel"]["name"];
             $path = public_path('Excel/' . $fileName);
             $result = Files::uploadFiles('excel', $_FILES, $path);
@@ -53,37 +53,25 @@ class ExcelControllers extends Controller
      */
     public function imgChangeName(Request $request)
     {
-
-        if (count($_FILES) > 0) {
-            // Excel Get Name
-            if ($_FILES["excel"]["error"] > 0 || in_array(1, $_FILES["img"]["error"])) {
-                return response()->json(['Error' => 'Upload file false！']);
-            }
-            $result = move_uploaded_file($_FILES["excel"]["tmp_name"], public_path('Img-Name/name/nameExcel.xlsx'));
+        if (key_exists('excel', $_FILES) && key_exists('img', $_FILES)) {
+            // Name Excel
+            $path = public_path('Img-Name/name/nameExcel.xlsx');
+            $result = Files::uploadFiles('excel', $_FILES, $path);
             if ($result) {
-                // get excel connect
-                $name = Excel::toArray($this->import, public_path('Img-Name/name/nameExcel.xlsx'));
+                $name = $array = $this->excelService->excelImportToArray($path);
                 $nameFix = $request->input('common');
-                // upload image
                 if (count($_FILES['img']['name']) > 0) {
-                    // delete image
-                    deldir(public_path('Img-Name/img'));
-                    unlink(public_path('Img-Name/image.zip'));
-
+                    // Image
+                    Files::deleteDir(public_path('Img-Name/img'));
+                    Files::deleteFiles(public_path('Img-Name/image.zip'));
                     foreach ($_FILES['img']['tmp_name'] as $key => $valus) {
-                        $result = move_uploaded_file($_FILES["img"]["tmp_name"][$key], public_path('Img-Name/img/' . $nameFix . $name[0][$key][2] . '.jpg'));
+                        Files::uploadFiles('excel', $_FILES["img"]["tmp_name"][$key], public_path('Img-Name/img/' . $nameFix . $name[0][$key][2] . '.jpg'), 2);
                     }
-                    if ($result) {
-                        // use zip
-                        $zipper = new \Chumper\Zipper\Zipper();
-                        $zipData = glob(public_path('Img-Name/img'));
-                        $zipper->make(public_path('Img-Name/image.zip'))->add($zipData)->close();
-                        return response()->json(['code' => 1, 'message' => 'http://localhost:8090/Excel-Change/public/Img-Name/image.zip']);
-                    }
-                    return response()->json(['code' => 0, 'message' => 'Move excel false!']);
+                    $this->excelService->setZipper(public_path('Img-Name/img'), public_path('Img-Name/image.zip'));
+                    return response()->json(['code' => 1, 'message' => config('excel.zipUrl')]);
                 }
             }
         }
-        return response()->json(['code' => 0, 'message' => 'No Upload File！']);
+        return response()->json(['code' => 0, 'message' => 'No Upload File Or Move excel false！']);
     }
 }
