@@ -5,20 +5,19 @@ namespace App\Http\Controllers\Excel;
 
 
 use App\Exports\ExcelExport;
+use App\Helpers\Files;
 use App\Http\Controllers\Controller;
-use App\Imports\ExcelImports;
+use App\Services\ExcelService;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
-use Overtrue\Pinyin\Pinyin;
 
 
 class ExcelControllers extends Controller
 {
 
-    public function __construct(ExcelImports $import, Pinyin $pinyin)
+    public function __construct(ExcelService $excelService)
     {
-        $this->import = $import;
-        $this->pinyin = $pinyin;
+        $this->excelService = $excelService;
     }
 
     /**
@@ -27,45 +26,23 @@ class ExcelControllers extends Controller
      */
     public function getPy()
     {
-        // upload
         if (count($_FILES) > 0) {
-            if ($_FILES["excel"]["error"] > 0) {
-                return response()->json(['Error' => $_FILES["excel"]["error"]]);
-            }
-            $result = move_uploaded_file($_FILES["excel"]["tmp_name"], public_path('Excel/' . $_FILES["excel"]["name"]));
+            // This Name Include Suffix
+            $fileName = $_FILES["excel"]["name"];
+            $path = public_path('Excel/' . $fileName);
+            $result = Files::uploadFiles('excel', $_FILES, $path);
             if ($result) {
                 // Import
-                $array = Excel::toArray($this->import, public_path('Excel/' . $_FILES["excel"]["name"]));
+                $array = $this->excelService->excelImportToArray($path);
                 // Pinyin
-                foreach ($array[0] as $key => &$value) {
-                    if ($value[0]) {
-                        $len = mb_strlen($value[0], 'utf-8');
-                        $name = $this->pinyin->name($value[0]);
-                        $namePy = '';
-                        if ($len === 2) {
-                            $name[0] = ucfirst($name[0]);
-                            $name[1] = ucfirst($name[1]);
-                            $namePy = $name[0] . ' ' . $name[1];
-                        }
-                        if ($len === 3) {
-                            $name[0] = ucfirst($name[0]);
-                            $name[1] = ucfirst($name[1]);
-                            $namePy = $name[0] . ' ' . $name[1] . $name[2];
-                        }
-                        array_push($value, $namePy);
-                    }
-                }
-
+                $array = $this->excelService->getNamePinyin($array[0]);
                 // Export
-                $export = new ExcelExport($array[0]);
-//            return Excel::download($export, 'export.xlsx');
-                if (Excel::store($export, $_FILES["excel"]["name"])) {
-                    return response()->json(['code' => 1, 'message' => 'http://localhost:8090/Excel-Change/storage/app/' . $_FILES["excel"]["name"]]);
+                if ($this->excelService->excelExportStore($array, $fileName)) {
+                    return response()->json(['code' => 1, 'message' => config('excel.getPyUrl') . $fileName]);
                 }
-                return response()->json(['code' => 0, 'message' => 'Export false!']);
             }
         }
-        return response()->json(['code' => 0, 'message' => 'No Upload File！']);
+        return response()->json(['code' => 0, 'message' => 'No Upload File Or Export false!']);
     }
 
     /**
