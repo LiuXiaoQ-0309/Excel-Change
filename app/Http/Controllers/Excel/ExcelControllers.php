@@ -4,12 +4,10 @@
 namespace App\Http\Controllers\Excel;
 
 
-use App\Exports\ExcelExport;
 use App\Helpers\Files;
 use App\Http\Controllers\Controller;
 use App\Services\ExcelService;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
 
 
 class ExcelControllers extends Controller
