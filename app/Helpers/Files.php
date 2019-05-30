@@ -18,18 +18,14 @@ class Files
     {
         // Judge
         if ($filesChange == 1) {
-            $type = gettype($_FILES[$key]["error"]);
-
             if ($_FILES[$key]["error"] > 0) {
                 return response()->json(['Error' => 'Upload file false！']);
             }
-            if ($type != 'integer') {
-                if (in_array(1, $_FILES[$key]["error"])) {
-                    return response()->json(['Error' => 'Upload file false！']);
-                }
-            }
             $files = $_FILES[$key]["tmp_name"];
         } else {
+            if (in_array(1, $_FILES[$key]["error"])) {
+                return response()->json(['Error' => 'Upload file false！']);
+            }
             $files = $files;
         }
 

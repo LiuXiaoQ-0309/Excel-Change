@@ -62,12 +62,14 @@ class ExcelControllers extends Controller
                 $nameFix = $request->input('common');
                 if (count($_FILES['img']['name']) > 0) {
                     // Image
-                    Files::deleteDir(public_path('Img-Name/img'));
-                    Files::deleteFiles(public_path('Img-Name/image.zip'));
+                    $dirPath = public_path('Img-Name/img');
+                    $zipPath = public_path('Img-Name/image.zip');
+                    Files::deleteDir($dirPath);
+                    Files::deleteFiles($zipPath);
                     foreach ($_FILES['img']['tmp_name'] as $key => $valus) {
-                        Files::uploadFiles('excel', $_FILES["img"]["tmp_name"][$key], public_path('Img-Name/img/' . $nameFix . $name[0][$key][2] . '.jpg'), 2);
+                        Files::uploadFiles('img', $_FILES["img"]["tmp_name"][$key], $dirPath . '/' . $nameFix . $name[0][$key][2] . '.jpg', 2);
                     }
-                    $this->excelService->setZipper(public_path('Img-Name/img'), public_path('Img-Name/image.zip'));
+                    $this->excelService->setZipper($dirPath, $zipPath);
                     return response()->json(['code' => 1, 'message' => config('excel.zipUrl')]);
                 }
             }
